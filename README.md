@@ -50,4 +50,4 @@ Build and run
 cargo run
 ```
 
-![hardest hello world to date lol](screenshots/hello.png)
+![hardest hello world to date lol](screenshots/hello_2.png)
