@@ -38,3 +38,33 @@ pub fn test_panic_handler(info: &PanicInfo) -> ! {
     exit_qemu(QemuExitCode::Failed);
     loop {}
 }
+
+/// Entry point for `cargo test`
+#[cfg(test)]
+#[no_mangle]
+pub extern "C" fn _start() -> ! {
+    test_main();
+    loop {}
+}
+
+#[cfg(test)]
+#[panic_handler]
+fn panic(info: &PanicInfo) -> ! {
+    test_panic_handler(info)
+}
+
+#[derive(PartialEq, Eq, Clone, Copy, Debug)]
+#[repr(u32)]
+pub enum QemuExitCode {
+    Success = 0x10,
+    Failed = 0x11,
+}
+
+pub fn exit_qemu(exit_code: QemuExitCode) {
+    use x86_64::instructions::port::{Port, PortGeneric};
+    unsafe {
+        let mut port: PortGeneric<u32, x86_64::instructions::port::ReadWriteAccess> =
+            Port::new(0xf4);
+        port.write(exit_code as u32);
+    }
+}
